@@ -48,6 +48,11 @@
                         Click="SelectRefFileButton_Click"
                         Width="200"
                         Margin="0,5" />
+                <Button Name="submitButton"
+                        Content="Submit"
+                        Click="SubmitButton_Click"
+                        Width="200"
+                        Margin="0,5" />
                 <Button Name="ResetSettings"
                         Content="Reset"
                         Click="ResetSettings_Click"
@@ -139,13 +144,6 @@
                           IsChecked="{Binding Path=DownsizeImage}" />
             </StackPanel>
 
-            <!-- Submit Button -->
-            <Button Content="Submit"
-                    Width="200"
-                    Margin="0,20,0,0"
-                    HorizontalAlignment="Left"
-                    IsEnabled="{Binding Path=IsSubmitEnabled}"
-                    Click="SubmitButton_Click" />
         </StackPanel>
 
         <!-- Right Side: List Display -->

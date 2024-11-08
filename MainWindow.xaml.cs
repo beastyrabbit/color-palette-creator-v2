@@ -268,6 +268,5 @@ namespace color_palette_creator_v2
             appSettings.resetSettings();
             DataContext.ResetandReload();
         }
-
     }
 }
