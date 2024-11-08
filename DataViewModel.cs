@@ -18,7 +18,6 @@ namespace color_palette_creator_v2
         private string _valueFactor;
 
         // Public property to store and retrieve the value as a string
-        [JsonIgnore]
         public string valueFactor
         {
             get => _valueFactor;
@@ -88,7 +87,7 @@ namespace color_palette_creator_v2
             }
         }
 
-        private string hexColorPicked;
+        private string hexColorPicked = "#FFFFFF";
         public string HexColorPicked
         {
             get => hexColorPicked;
@@ -117,16 +116,25 @@ namespace color_palette_creator_v2
         public DataViewModel()
         {
             appSettings = new AppSettings();
-            // Load the brightness factors from settings
-            var loadedBrightnessFactors = appSettings.LoadBrightnessFactors();
-            BrightnessFactors = new ObservableCollection<FactorItem>(loadedBrightnessFactors);
-            BrightnessFactors.CollectionChanged += (s, e) => SaveBrightnessFactors();
-            var loadedHueFactors = appSettings.LoadHueFactors();
-            HueFactors = new ObservableCollection<FactorItem>(loadedHueFactors);
-            HueFactors.CollectionChanged += (s, e) => SaveHueFactors();
-            var loadedColorFactors = appSettings.LoadColorFactors();
-            ColorFactors = new ObservableCollection<FactorItem>(loadedColorFactors);
-            ColorFactors.CollectionChanged += (s, e) => SaveColorFactors();
+
+            // Load collections directly from settings
+            BrightnessFactors = new ObservableCollection<FactorItem>(appSettings.LoadBrightnessFactors());
+            BrightnessFactors.CollectionChanged += (s, e) =>
+            {
+                SaveBrightnessFactors();
+            };
+
+            HueFactors = new ObservableCollection<FactorItem>(appSettings.LoadHueFactors());
+            HueFactors.CollectionChanged += (s, e) =>
+            {
+                SaveHueFactors();
+            };
+
+            ColorFactors = new ObservableCollection<FactorItem>(appSettings.LoadColorFactors());
+            ColorFactors.CollectionChanged += (s, e) =>
+            {
+                SaveColorFactors();
+            };
         }
 
  
@@ -173,7 +181,9 @@ HueFactors.Clear(); // Clear existing items
             
                 ColorFactors.Add(new FactorItem { valueFactor = hexColorPicked, matchBrush = new SolidColorBrush(ColorPicked) });
                 ColorFactor = default; // Reset input after adding
-          
+            hexColorPicked = "#FFFFFF";
+
+
         }
 
         // Method to remove a factor from the list

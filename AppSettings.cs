@@ -80,7 +80,7 @@ public class AppSettings
     public void SaveBrightnessFactors(List<FactorItem> brightnessFactors)
     {
         string serializedList = JsonSerializer.Serialize(brightnessFactors);
-        localSettings.Values[nameof(HueFactors)] = serializedList;
+        localSettings.Values[nameof(brightnessFactors)] = serializedList;
     }
 
 
@@ -151,20 +151,25 @@ public class AppSettings
         if (localSettings.Values.TryGetValue(nameof(ColorFactors), out object serializedList))
         {
             List<FactorItem> ColorFactorsList = JsonSerializer.Deserialize<List<FactorItem>>((string)serializedList);
-            if (ColorFactorsList.Count >= 93)
+
+            if (ColorFactorsList != null && ColorFactorsList.Count >= 1)
             {
                 foreach (var item in ColorFactorsList)
                 {
-                    item.matchBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(
-                        byte.Parse(item.valueFactor.Substring(0, 2), System.Globalization.NumberStyles.HexNumber),
-                        byte.Parse(item.valueFactor.Substring(2, 2), System.Globalization.NumberStyles.HexNumber),
-                        byte.Parse(item.valueFactor.Substring(4, 2), System.Globalization.NumberStyles.HexNumber),
-                        byte.Parse(item.valueFactor.Substring(6, 2), System.Globalization.NumberStyles.HexNumber))); // Assign the conversion function
+                    string hex = item.valueFactor.TrimStart('#');
+
+                    // Determine if the hex string includes an alpha component
+                    byte a = hex.Length == 8 ? byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber) : (byte)255;
+                    byte r = hex.Length == 8 ? byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber) : byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+                    byte g = hex.Length == 8 ? byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber) : byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+                    byte b = hex.Length == 8 ? byte.Parse(hex.Substring(6, 2), System.Globalization.NumberStyles.HexNumber) : byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+
+                    item.matchBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(a, r, g, b));
                 }
                 return ColorFactorsList;
             }
-
         }
         return new List<FactorItem>();
     }
+
 }
