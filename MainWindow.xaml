@@ -166,7 +166,7 @@
                          Margin="0,5">
                     <ListView.ItemTemplate>
 
-                        <DataTemplate x:DataType="local:DataViewModel" >
+                        <DataTemplate >
                                 <!-- Use a Grid with two columns to control alignment -->
                                 <Grid>
                                     <Grid.ContextFlyout>
@@ -190,13 +190,13 @@
                                              Margin="6"
                                              VerticalAlignment="Center"
                                              HorizontalAlignment="Center"
-                                         Fill="{x:Bind GetBrightnessColor(NewFactor),Mode=OneWay}"
+                                         Fill="{Binding matchBrush}"
                                           />
 
                                     <!-- TextBlock in the first column (left) -->
                                 <TextBlock Grid.Column="1"
                                            Grid.Row="1"
-                                           Text="{x:Bind NewFactor}"
+                                           Text="{Binding valueFactor}"
                                            Style="{ThemeResource BodyTextBlockStyle}"
                                            Margin="12,0,0,6" />
 
@@ -245,7 +245,7 @@
                           Margin="0,5">
                     <ListView.ItemTemplate>
 
-                        <DataTemplate x:DataType="local:DataViewModel">
+                        <DataTemplate>
                             <!-- Use a Grid with two columns to control alignment -->
                             <Grid>
                                 <Grid.ContextFlyout>
@@ -270,13 +270,13 @@
                                          Margin="6"
                                          VerticalAlignment="Center"
                                          HorizontalAlignment="Center"
-                                         Fill="{x:Bind GetHueColor(NewFactor),Mode=OneWay}"
+                                         Fill="{Binding matchBrush}"
                                           />
 
                                 <!-- TextBlock in the first column (left) -->
                                 <TextBlock Grid.Column="1"
                                            Grid.Row="1"
-                                           Text="{x:Bind NewFactor}"
+                                           Text="{Binding valueFactor}"
                                            Style="{ThemeResource BodyTextBlockStyle}"
                                            Margin="12,0,0,6" />
 

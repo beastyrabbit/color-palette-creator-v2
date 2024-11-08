@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
+using ColorMine.ColorSpaces;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -140,13 +141,6 @@ namespace color_palette_creator_v2
             DataContext.AddBrightnessFactor();
         }
 
-        private void AddButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && button.DataContext is int factor)
-            {
-                DataContext.BrightnessFactors.Add(factor + 1); // Add 1 to the selected factor
-            }
-        }
 
         private void RemoveBrightnessButton_Click(object sender, RoutedEventArgs e)
         {
@@ -168,7 +162,6 @@ namespace color_palette_creator_v2
         {
             appSettings.resetSettings();
         }
-
 
     }
 }
