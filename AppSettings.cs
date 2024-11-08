@@ -46,6 +46,10 @@ public class AppSettings
             List<FactorItem> BrightnessFactorsList = JsonSerializer.Deserialize<List<FactorItem>>((string)serializedList);
             if (BrightnessFactorsList.Count >= 1)
             {
+                foreach (var item in BrightnessFactorsList)
+                {
+                    item.matchBrush = DataViewModel.GetBrightnessColor(item.valueFactor); // Assign the conversion function
+                }
                 return BrightnessFactorsList;
             }
             else
@@ -92,6 +96,10 @@ public class AppSettings
             List<FactorItem> HueFactorsList = JsonSerializer.Deserialize<List<FactorItem>>((string)serializedList);
             if (HueFactorsList.Count >= 1)
             {
+                foreach (var item in HueFactorsList)
+                {
+                    item.matchBrush = DataViewModel.GetHueColor(item.valueFactor); // Assign the conversion function
+                }
                 return HueFactorsList;
             }
             else

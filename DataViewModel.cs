@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Windows.Networking.Sockets;
 
@@ -14,6 +15,9 @@ namespace color_palette_creator_v2
     public class FactorItem
     {
         public int valueFactor { get; set; }
+
+        // Non-serialized property to convert Color to Brush
+        [JsonIgnore]
         public Brush matchBrush { get; set; }
     }
 
