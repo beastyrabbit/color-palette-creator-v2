@@ -44,9 +44,21 @@ namespace color_palette_creator_v2
             this.InitializeComponent();
             this.Closed += OnWindowClosed;
             DataContext = new DataViewModel();
+            setupButton();
+
 
         }
 
+        private void setupButton()
+        {
+            UpdateResetSettingsButton(true,Microsoft.UI.Colors.Gray);
+            UpdateSelectImageButton(true, Microsoft.UI.Colors.YellowGreen);
+            UpdateSelectFolderButton(true, Microsoft.UI.Colors.YellowGreen);
+            UpdateSelectColorPaletteButton(true, Microsoft.UI.Colors.Gray);
+            UpdateSelectRefFileButton(true, Microsoft.UI.Colors.Gray);
+            UpdateSubmitButton(false, Microsoft.UI.Colors.Red);
+
+        }
 
         private void OnWindowClosed(object sender, WindowEventArgs args)
         {
@@ -268,5 +280,47 @@ namespace color_palette_creator_v2
             appSettings.resetSettings();
             DataContext.ResetandReload();
         }
+
+        private void UpdateSelectImageButton(bool isEnabled, Windows.UI.Color backgroundColor)
+        {
+            SelectImageButton.IsEnabled = isEnabled;
+            SelectImageButton.Background = new SolidColorBrush(backgroundColor);
+        }
+
+        // Method to update SelectFolderButton properties
+        private void UpdateSelectFolderButton(bool isEnabled, Windows.UI.Color backgroundColor)
+        {
+            SelectFolderButton.IsEnabled = isEnabled;
+            SelectFolderButton.Background = new SolidColorBrush(backgroundColor);
+        }
+
+        // Method to update SelectColorPalette button properties
+        private void UpdateSelectColorPaletteButton(bool isEnabled, Windows.UI.Color backgroundColor)
+        {
+            SelectColorPalette.IsEnabled = isEnabled;
+            SelectColorPalette.Background = new SolidColorBrush(backgroundColor);
+        }
+
+        // Method to update SelectRefFile button properties
+        private void UpdateSelectRefFileButton(bool isEnabled, Windows.UI.Color backgroundColor)
+        {
+            SelectRefFile.IsEnabled = isEnabled;
+            SelectRefFile.Background = new SolidColorBrush(backgroundColor);
+        }
+
+        // Method to update Submit button properties
+        private void UpdateSubmitButton(bool isEnabled, Windows.UI.Color backgroundColor)
+        {
+            submitButton.IsEnabled = isEnabled;
+            submitButton.Background = new SolidColorBrush(backgroundColor);
+        }
+
+        // Method to update ResetSettings button properties
+        private void UpdateResetSettingsButton(bool isEnabled, Windows.UI.Color backgroundColor)
+        {
+            ResetSettings.IsEnabled = isEnabled;
+            ResetSettings.Background = new SolidColorBrush(backgroundColor);
+        }
+
     }
 }
