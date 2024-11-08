@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "color_palette_creator_v2 (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "color_palette_creator_v2 (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
