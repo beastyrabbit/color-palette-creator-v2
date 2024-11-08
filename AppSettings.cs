@@ -1,4 +1,6 @@
 ﻿using color_palette_creator_v2;
+using Microsoft.UI.Xaml.Media;
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using Windows.Storage;
@@ -14,7 +16,9 @@ public class AppSettings
 
     public void resetSettings()
     {
+        //Remove complete local settings
         localSettings.Values.Clear();
+
     }
 
     // Property to store DominantColorCount
@@ -48,7 +52,7 @@ public class AppSettings
             {
                 foreach (var item in BrightnessFactorsList)
                 {
-                    item.matchBrush = DataViewModel.GetBrightnessColor(item.valueFactor); // Assign the conversion function
+                    item.matchBrush = DataViewModel.GetBrightnessColor(item.IntValueFactor); // Assign the conversion function
                 }
                 return BrightnessFactorsList;
             }
@@ -56,19 +60,19 @@ public class AppSettings
             {
                 return new List<FactorItem>
                 {
-                    new FactorItem { valueFactor = 64, matchBrush = DataViewModel.GetBrightnessColor(64) },
-                    new FactorItem { valueFactor = 96, matchBrush = DataViewModel.GetBrightnessColor(96) },
-                    new FactorItem { valueFactor = 160, matchBrush = DataViewModel.GetBrightnessColor(160) },
-                    new FactorItem { valueFactor = 192, matchBrush = DataViewModel.GetBrightnessColor(192) }
+                    new FactorItem { IntValueFactor = 64, matchBrush = DataViewModel.GetBrightnessColor(64) },
+                    new FactorItem { IntValueFactor = 96, matchBrush = DataViewModel.GetBrightnessColor(96) },
+                    new FactorItem { IntValueFactor = 160, matchBrush = DataViewModel.GetBrightnessColor(160) },
+                    new FactorItem { IntValueFactor = 192, matchBrush = DataViewModel.GetBrightnessColor(192) }
                 };
             }
         }
         return new List<FactorItem>
                 {
-                    new FactorItem { valueFactor = 64, matchBrush = DataViewModel.GetBrightnessColor(64) },
-                    new FactorItem { valueFactor = 96, matchBrush = DataViewModel.GetBrightnessColor(96) },
-                    new FactorItem { valueFactor = 160, matchBrush = DataViewModel.GetBrightnessColor(160) },
-                    new FactorItem { valueFactor = 192, matchBrush = DataViewModel.GetBrightnessColor(192) }
+                    new FactorItem { IntValueFactor = 64, matchBrush = DataViewModel.GetBrightnessColor(64) },
+                    new FactorItem { IntValueFactor = 96, matchBrush = DataViewModel.GetBrightnessColor(96) },
+                    new FactorItem { IntValueFactor = 160, matchBrush = DataViewModel.GetBrightnessColor(160) },
+                    new FactorItem { IntValueFactor = 192, matchBrush = DataViewModel.GetBrightnessColor(192) }
                 };
     }
 
@@ -98,7 +102,7 @@ public class AppSettings
             {
                 foreach (var item in HueFactorsList)
                 {
-                    item.matchBrush = DataViewModel.GetHueColor(item.valueFactor); // Assign the conversion function
+                    item.matchBrush = DataViewModel.GetHueColor(item.IntValueFactor); // Assign the conversion function
                 }
                 return HueFactorsList;
             }
@@ -106,26 +110,61 @@ public class AppSettings
             {
                 return new List<FactorItem>
                 {
-                    new FactorItem { valueFactor = 0, matchBrush = DataViewModel.GetHueColor(0) },
-                    new FactorItem { valueFactor = 30, matchBrush = DataViewModel.GetHueColor(30) },
-                    new FactorItem { valueFactor = 60, matchBrush = DataViewModel.GetHueColor(60) },
-                    new FactorItem { valueFactor = 90, matchBrush = DataViewModel.GetHueColor(90) }
+                    new FactorItem { IntValueFactor = 0, matchBrush = DataViewModel.GetHueColor(0) },
+                    new FactorItem { IntValueFactor = 30, matchBrush = DataViewModel.GetHueColor(30) },
+                    new FactorItem { IntValueFactor = 60, matchBrush = DataViewModel.GetHueColor(60) },
+                    new FactorItem { IntValueFactor = 90, matchBrush = DataViewModel.GetHueColor(90) }
                 };
             }
         }
         return new List<FactorItem>
                 {
-                    new FactorItem { valueFactor = 0, matchBrush = DataViewModel.GetHueColor(0) },
-                    new FactorItem { valueFactor = 30, matchBrush = DataViewModel.GetHueColor(30) },
-                    new FactorItem { valueFactor = 60, matchBrush = DataViewModel.GetHueColor(60) },
-                    new FactorItem { valueFactor = 90, matchBrush = DataViewModel.GetHueColor(90) }
+                    new FactorItem { IntValueFactor = 0, matchBrush = DataViewModel.GetHueColor(0) },
+                    new FactorItem { IntValueFactor = 30, matchBrush = DataViewModel.GetHueColor(30) },
+                    new FactorItem { IntValueFactor = 60, matchBrush = DataViewModel.GetHueColor(60) },
+                    new FactorItem { IntValueFactor = 90, matchBrush = DataViewModel.GetHueColor(90) }
                 };
     }
 
-    // Method to save HueFactors
+   // Method to save HueFactors
     public void SaveHueFactors(List<FactorItem> HueFactors)
     {
         string serializedList = JsonSerializer.Serialize(HueFactors);
         localSettings.Values[nameof(HueFactors)] = serializedList;
+    }
+
+    public List<FactorItem> ColorFactors
+    {
+        get => LoadColorFactors();
+        set => SaveColorFactors(value);
+    }
+
+    public void SaveColorFactors(List<FactorItem> ColorFactors)
+    {
+        string serializedList = JsonSerializer.Serialize(ColorFactors);
+        localSettings.Values[nameof(ColorFactors)] = serializedList;
+    }
+
+
+    public List<FactorItem> LoadColorFactors()
+    {
+        if (localSettings.Values.TryGetValue(nameof(ColorFactors), out object serializedList))
+        {
+            List<FactorItem> ColorFactorsList = JsonSerializer.Deserialize<List<FactorItem>>((string)serializedList);
+            if (ColorFactorsList.Count >= 93)
+            {
+                foreach (var item in ColorFactorsList)
+                {
+                    item.matchBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(
+                        byte.Parse(item.valueFactor.Substring(0, 2), System.Globalization.NumberStyles.HexNumber),
+                        byte.Parse(item.valueFactor.Substring(2, 2), System.Globalization.NumberStyles.HexNumber),
+                        byte.Parse(item.valueFactor.Substring(4, 2), System.Globalization.NumberStyles.HexNumber),
+                        byte.Parse(item.valueFactor.Substring(6, 2), System.Globalization.NumberStyles.HexNumber))); // Assign the conversion function
+                }
+                return ColorFactorsList;
+            }
+
+        }
+        return new List<FactorItem>();
     }
 }

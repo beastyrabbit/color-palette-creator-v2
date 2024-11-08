@@ -15,7 +15,7 @@
         <!-- Define two main columns: left for buttons and settings, right for lists -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*" />
-            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="4*" />
         </Grid.ColumnDefinitions>
 
         <!-- Left Side: Buttons and Settings -->
@@ -157,48 +157,67 @@
                            Margin="5" />
 
                 <!-- List with Buttons -->
-                <ListView ItemsSource="{x:Bind DataContext.BrightnessFactors, Mode=TwoWay}"
-                         Width="150"
+                <ListView ItemsSource="{x:Bind DataContext.BrightnessFactors, Mode=OneWay}"
+                         Width="330"
                          Height="200"
-                         ShowsScrollingPlaceholders="False"
+                         ShowsScrollingPlaceholders="True"
                          BorderThickness="1"
+                         HorizontalAlignment="Left"
                          BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}"
-                         Margin="0,5">
+                         Margin="5,5">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid Orientation="Horizontal"
+                                           MaximumRowsOrColumns="3" />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+
                     <ListView.ItemTemplate>
 
                         <DataTemplate >
                                 <!-- Use a Grid with two columns to control alignment -->
-                                <Grid>
-                                    <Grid.ContextFlyout>
+                            <Grid HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  Background="Transparent">
+                                <Grid.ContextFlyout>
                                         <MenuFlyout>
                                             <MenuFlyoutItem Text="Delete" Click="RemoveBrightnessButton_Click" />
                                         </MenuFlyout>
                                     </Grid.ContextFlyout>
 
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="5" />
+                                    <RowDefinition Height="35" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition Width="40" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="32"
+                                        Height="32"
+                                        Margin="2"
+                                        Grid.Row="1"
+                                        BorderBrush="White"
+                                        BorderThickness="3"
+                                        CornerRadius="16"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Left">
                                     <Ellipse x:Name="Ellipse"
-                                             Grid.RowSpan="2"
                                              Width="32"
                                              Height="32"
-                                             Margin="6"
                                              VerticalAlignment="Center"
                                              HorizontalAlignment="Center"
-                                         Fill="{Binding matchBrush}"
-                                          />
+                                             Fill="{Binding matchBrush}" />
+                                </Border>
 
-                                    <!-- TextBlock in the first column (left) -->
-                                <TextBlock Grid.Column="1"
-                                           Grid.Row="1"
+                                <!-- TextBlock in the first column (left) -->
+                                <TextBlock Grid.Column="2"
+                                           Grid.Row="2"
+                                           VerticalAlignment="Center"
                                            Text="{Binding valueFactor}"
                                            Style="{ThemeResource BodyTextBlockStyle}"
-                                           Margin="12,0,0,6" />
+                                           Margin="12,0,0,0" />
 
                             </Grid>
                             </DataTemplate>
@@ -236,49 +255,64 @@
                            Margin="5" />
 
                 <!-- List with Buttons -->
-                <ListView ItemsSource="{x:Bind DataContext.HueFactors, Mode=TwoWay}"
-                          Width="150"
+                <ListView ItemsSource="{x:Bind DataContext.HueFactors, Mode=OneWay}"
+                          Width="330"
                           Height="200"
                           ShowsScrollingPlaceholders="False"
                           BorderThickness="1"
+                          HorizontalAlignment="Left"
                           BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}"
-                          Margin="0,5">
+                          Margin="5,5">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid Orientation="Horizontal"
+                                           MaximumRowsOrColumns="3" />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
                     <ListView.ItemTemplate>
-
                         <DataTemplate>
                             <!-- Use a Grid with two columns to control alignment -->
-                            <Grid>
+                            <Grid HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  Background="Transparent">
                                 <Grid.ContextFlyout>
                                     <MenuFlyout>
-                                        <MenuFlyoutItem Text="Delete"
-                                                        Click="RemoveHueButton_Click" />
+                                        <MenuFlyoutItem Text="Delete"   Click="RemoveHueButton_Click" />
                                     </MenuFlyout>
                                 </Grid.ContextFlyout>
 
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Ellipse 
-                                         Grid.RowSpan="2"
-                                         Width="32"
-                                         Height="32"
-                                         Margin="6"
-                                         VerticalAlignment="Center"
-                                         HorizontalAlignment="Center"
-                                         Fill="{Binding matchBrush}"
-                                          />
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="5" />
+                                <RowDefinition Height="35" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40" />
+                                <ColumnDefinition Width="40" />
+                            </Grid.ColumnDefinitions>
+                                <Border Width="32"
+                                        Height="32"
+                                        Margin="2"
+                                        Grid.Row="1"
+                                        BorderBrush="White"
+                                        BorderThickness="3"
+                                        CornerRadius="16"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Left">
+                                    <Ellipse x:Name="Ellipse"
+                                             Width="32"
+                                             Height="32"
+                                             VerticalAlignment="Center"
+                                             HorizontalAlignment="Center"
+                                             Fill="{Binding matchBrush}" />
+                                </Border>
 
                                 <!-- TextBlock in the first column (left) -->
-                                <TextBlock Grid.Column="1"
-                                           Grid.Row="1"
+                                <TextBlock Grid.Column="2"
+                                           Grid.Row="2"
+                                           VerticalAlignment="Center"
                                            Text="{Binding valueFactor}"
                                            Style="{ThemeResource BodyTextBlockStyle}"
-                                           Margin="12,0,0,6" />
+                                           Margin="12,0,0,0" />
 
                             </Grid>
                         </DataTemplate>
@@ -291,7 +325,7 @@
                             Margin="0,10">
                     <TextBox Width="130"
                              Text="{x:Bind DataContext.HueFactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             PlaceholderText="Enter new brightness factor">
+                             PlaceholderText="Addional fixed Colors">
                     </TextBox>
 
                     <Button Width="45"
@@ -307,7 +341,116 @@
 
             </StackPanel>
 
+            <StackPanel Margin="10">
 
+                <!-- Title -->
+                <TextBlock Text="Hue Factors 0-360:"
+                           FontWeight="Bold"
+                           Margin="5" />
+
+                <!-- List with Buttons -->
+                <ListView ItemsSource="{x:Bind DataContext.ColorFactors, Mode=OneWay}"
+                          Width="330"
+                          Height="200"
+                          ShowsScrollingPlaceholders="False"
+                          BorderThickness="1"
+                          HorizontalAlignment="Left"
+                          BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}"
+                          Margin="5,5">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid Orientation="Horizontal"
+                                           MaximumRowsOrColumns="2" />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <!-- Use a Grid with two columns to control alignment -->
+                            <Grid HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  Background="Transparent">
+                                <Grid.ContextFlyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Text="Delete"
+                                                        Click="RemoveColorButton_Click" />
+                                    </MenuFlyout>
+                                </Grid.ContextFlyout>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="5" />
+                                    <RowDefinition Height="35" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="55" />
+                                    <ColumnDefinition Width="80" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="32"
+                                        Height="32"
+                                        Margin="2"
+                                        Grid.Row="1"
+                                        BorderBrush="White"
+                                        BorderThickness="3"
+                                        CornerRadius="16"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Left">
+                                    <Ellipse x:Name="Ellipse"
+                                             Width="32"
+                                             Height="32"
+                                             VerticalAlignment="Center"
+                                             HorizontalAlignment="Center"
+                                             Fill="{Binding matchBrush}" />
+                                </Border>
+
+                                <!-- TextBlock in the first column (left) -->
+                                <TextBlock Grid.Column="2"
+                                           Grid.Row="2"
+                                           VerticalAlignment="Center"
+                                           Text="{Binding valueFactor}"
+                                           Style="{ThemeResource BodyTextBlockStyle}"
+                                           Margin="12,0,0,0" />
+
+                            </Grid>
+                        </DataTemplate>
+
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <StackPanel Orientation="Horizontal"
+                            Margin="0,10">
+                    <!-- TextBox that opens ColorPicker Flyout -->
+                    <TextBox Width="120"
+                             Margin="0,0,10,0"
+                             Text="{x:Bind DataContext.HexColorPicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.ContextFlyout>
+                            <Flyout Placement="Bottom">
+                                <StackPanel>
+                                    <ColorPicker ColorSpectrumShape="Ring"
+                                                 IsMoreButtonVisible="False"
+                                                 IsColorSliderVisible="True"
+                                                 IsColorChannelTextInputVisible="False"
+                                                 IsHexInputVisible="False"
+                                                 IsAlphaEnabled="True"
+                                                 IsAlphaSliderVisible="True"
+                                                 IsAlphaTextInputVisible="false"
+                                                 
+                                                 Color="{x:Bind DataContext.ColorPicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+                            </Flyout>
+                        </TextBox.ContextFlyout>
+                    </TextBox>
+
+                    <Button Width="45"
+                            Margin="5,0"
+                            Click="AddNewColorFactor_Click">
+                        <Button.Content>
+                            <FontIcon Glyph="&#xE710;"
+                                      FontSize="20"
+                                      Foreground="Green" />
+                        </Button.Content>
+                    </Button>
+                </StackPanel>
+
+            </StackPanel>
 
             <!-- Additional lists can be added here as needed -->
         </StackPanel>

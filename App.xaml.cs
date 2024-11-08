@@ -45,7 +45,7 @@ namespace color_palette_creator_v2
             m_window.Activate();
 
             // Set Window size to 800x800
-            m_window.AppWindow.Resize(new Windows.Graphics.SizeInt32(1000, 1000));
+            m_window.AppWindow.Resize(new Windows.Graphics.SizeInt32(1000, 1500));
         }
 
         private Window m_window;

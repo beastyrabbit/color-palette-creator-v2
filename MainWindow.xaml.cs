@@ -144,7 +144,7 @@ namespace color_palette_creator_v2
 
         private void RemoveBrightnessButton_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as MenuFlyoutItem)?.DataContext is int factor)
+            if ((sender as MenuFlyoutItem)?.DataContext is FactorItem factor)
             {
                 DataContext.RemoveBrightnessFactor(factor);
             }
@@ -152,15 +152,30 @@ namespace color_palette_creator_v2
 
         private void RemoveHueButton_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as MenuFlyoutItem)?.DataContext is int factor)
+            if ((sender as MenuFlyoutItem)?.DataContext is FactorItem factor)
             {
                 DataContext.RemoveHueFactor(factor);
+            }
+        }
+
+        private void AddNewColorFactor_Click(object sender, RoutedEventArgs e)
+        {
+            DataContext.AddColorFactor();
+        }
+
+
+        private void RemoveColorButton_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as MenuFlyoutItem)?.DataContext is FactorItem factor)
+            {
+                DataContext.RemoveColorFactor(factor);
             }
         }
 
         private void ResetSettings_Click(object sender, RoutedEventArgs e)
         {
             appSettings.resetSettings();
+            DataContext.ResetandReload();
         }
 
     }

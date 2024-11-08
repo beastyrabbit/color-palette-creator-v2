@@ -14,7 +14,25 @@ namespace color_palette_creator_v2
 {
     public class FactorItem
     {
-        public int valueFactor { get; set; }
+        // Private backing field to store the value as a string
+        private string _valueFactor;
+
+        // Public property to store and retrieve the value as a string
+        [JsonIgnore]
+        public string valueFactor
+        {
+            get => _valueFactor;
+            set => _valueFactor = value;
+        }
+
+
+        // Integer interface for ValueFactor, converting to and from string
+        [JsonIgnore]
+        public int IntValueFactor
+        {
+            get => int.TryParse(_valueFactor, out int result) ? result : 0; // Default to 0 if parse fails
+            set => _valueFactor = value.ToString(); // Store the integer as a string
+        }
 
         // Non-serialized property to convert Color to Brush
         [JsonIgnore]
@@ -27,6 +45,7 @@ namespace color_palette_creator_v2
         // Observable collection to hold brightness values
         public ObservableCollection<FactorItem> BrightnessFactors { get; set; } = new ObservableCollection<FactorItem>();
         public ObservableCollection<FactorItem> HueFactors { get; set; } = new ObservableCollection<FactorItem>();
+        public ObservableCollection<FactorItem> ColorFactors { get; set; } = new ObservableCollection<FactorItem>();
 
         private AppSettings appSettings;
         private int brightnessFactor;
@@ -37,7 +56,7 @@ namespace color_palette_creator_v2
             get => brightnessFactor;
             set
             {
-                hueFactor = value < 0 ? 0 : value > 255 ? 255 : value;
+                brightnessFactor = value < 0 ? 0 : value > 255 ? 360 : value;
                 OnPropertyChanged(nameof(BrightnessFactor));
             }
         }
@@ -55,6 +74,45 @@ namespace color_palette_creator_v2
             }
         }
 
+        private Windows.UI.Color colorFactor ;
+        public Windows.UI.Color ColorFactor
+        {
+            get => colorFactor;
+            set
+            {
+                if (colorFactor != value)
+                {
+                    colorFactor = value;
+                    OnPropertyChanged(nameof(ColorFactor));
+                }
+            }
+        }
+
+        private string hexColorPicked;
+        public string HexColorPicked
+        {
+            get => hexColorPicked;
+            set
+            {
+                if (hexColorPicked != value)
+                {
+                    hexColorPicked = value;
+                    OnPropertyChanged(nameof(HexColorPicked));
+                }
+            }
+        }
+
+        private Windows.UI.Color colorPicked = Windows.UI.Color.FromArgb(255, 255, 255, 255);
+        public Windows.UI.Color ColorPicked
+        {
+            get => colorPicked;
+            set
+            {
+                colorPicked = value;
+                HexColorPicked = $"#{colorPicked.R:X2}{colorPicked.G:X2}{colorPicked.B:X2}";
+            }
+        }
+
 
         public DataViewModel()
         {
@@ -66,6 +124,32 @@ namespace color_palette_creator_v2
             var loadedHueFactors = appSettings.LoadHueFactors();
             HueFactors = new ObservableCollection<FactorItem>(loadedHueFactors);
             HueFactors.CollectionChanged += (s, e) => SaveHueFactors();
+            var loadedColorFactors = appSettings.LoadColorFactors();
+            ColorFactors = new ObservableCollection<FactorItem>(loadedColorFactors);
+            ColorFactors.CollectionChanged += (s, e) => SaveColorFactors();
+        }
+
+ 
+        public void ResetandReload()
+        {
+BrightnessFactors.Clear(); // Clear existing items
+            var loadedBrightnessFactors = appSettings.LoadBrightnessFactors();
+            foreach (var item in loadedBrightnessFactors)
+            {
+                BrightnessFactors.Add(item); // Append reloaded items
+            }
+HueFactors.Clear(); // Clear existing items
+            var loadedHueFactors = appSettings.LoadHueFactors();
+            foreach (var item in loadedHueFactors)
+            {
+                HueFactors.Add(item); // Append reloaded items
+            } 
+            ColorFactors.Clear(); // Clear existing items
+            var loadedColorFactors = appSettings.LoadColorFactors();
+            foreach (var item in loadedColorFactors)
+            {
+                ColorFactors.Add(item); // Append reloaded items
+            }
         }
 
         // Method to add a new factor to the list
@@ -73,39 +157,48 @@ namespace color_palette_creator_v2
         {
             if (brightnessFactor > 0) // Add only if brightnessFactor is valid
             {
-                BrightnessFactors.Add(new FactorItem { valueFactor = brightnessFactor, matchBrush = GetBrightnessColor(brightnessFactor) });
-                brightnessFactor = 0; // Reset input after adding
+                BrightnessFactors.Add(new FactorItem { IntValueFactor = brightnessFactor, matchBrush = GetBrightnessColor(brightnessFactor) });
+                BrightnessFactor = 0; // Reset input after adding
             }
+        }
+        // Method to remove a factor from the list
+        public void RemoveBrightnessFactor(FactorItem factor)
+        {
+            // var itemToRemove = BrightnessFactors.FirstOrDefault(factor);
+            BrightnessFactors.Remove(factor);
+        }
+        // Method to add a new factor to the list
+        public void AddColorFactor()
+        {
+            
+                ColorFactors.Add(new FactorItem { valueFactor = hexColorPicked, matchBrush = new SolidColorBrush(ColorPicked) });
+                ColorFactor = default; // Reset input after adding
+          
         }
 
         // Method to remove a factor from the list
-        public void RemoveBrightnessFactor(int factor)
+        public void RemoveColorFactor(FactorItem factor)
         {
-            var itemToRemove = BrightnessFactors.FirstOrDefault(f => f.valueFactor == factor);
-            if (itemToRemove != null)
-            {
-                BrightnessFactors.Remove(itemToRemove);
-            }
+            ColorFactors.Remove(factor);
         }
+
+
 
         // Method to add a new factor to the list
         public void AddHueFactor()
         {
             if (hueFactor > 0) // Add only if brightnessFactor is valid
             {
-                HueFactors.Add(new FactorItem { valueFactor = hueFactor, matchBrush = GetHueColor(hueFactor) });
-                hueFactor = 0; // Reset input after adding
+                HueFactors.Add(new FactorItem { IntValueFactor = hueFactor, matchBrush = GetHueColor(hueFactor) });
+                HueFactor = 0; // Reset input after adding
             }
         }
 
         // Method to remove a factor from the list
-        public void RemoveHueFactor(int factor)
+        public void RemoveHueFactor(FactorItem factor)
         {
-            var itemToRemove = HueFactors.FirstOrDefault(f => f.valueFactor == factor);
-            if (itemToRemove != null)
-            {
-                HueFactors.Remove(itemToRemove);
-            }
+            //var itemToRemove = HueFactors.FirstOrDefault(factor);
+            HueFactors.Remove(factor);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -122,6 +215,12 @@ namespace color_palette_creator_v2
         private void SaveHueFactors()
         {
             appSettings.SaveHueFactors(new List<FactorItem>(HueFactors));
+        }
+
+
+        private void SaveColorFactors()
+        {
+            appSettings.SaveColorFactors(new List<FactorItem>(ColorFactors));
         }
 
         public static Brush GetBrightnessColor(int brightness)
