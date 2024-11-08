@@ -29,16 +29,29 @@ namespace color_palette_creator_v2
         public ObservableCollection<FactorItem> HueFactors { get; set; } = new ObservableCollection<FactorItem>();
 
         private AppSettings appSettings;
-        private int newFactor;
-        public int NewFactor
+        private int brightnessFactor;
+        public int BrightnessFactor
 
 
         {
-            get => newFactor;
+            get => brightnessFactor;
             set
             {
-                newFactor = value;
-                OnPropertyChanged(nameof(NewFactor));
+                hueFactor = value < 0 ? 0 : value > 255 ? 255 : value;
+                OnPropertyChanged(nameof(BrightnessFactor));
+            }
+        }
+
+        private int hueFactor;
+        public int HueFactor
+
+
+        {
+            get => hueFactor;
+            set
+            {
+                hueFactor = value < 0 ? 0 : value > 360 ? 360 : value;
+                OnPropertyChanged(nameof(HueFactor));
             }
         }
 
@@ -58,10 +71,10 @@ namespace color_palette_creator_v2
         // Method to add a new factor to the list
         public void AddBrightnessFactor()
         {
-            if (newFactor > 0) // Add only if newFactor is valid
+            if (brightnessFactor > 0) // Add only if brightnessFactor is valid
             {
-                BrightnessFactors.Add(new FactorItem { valueFactor = newFactor, matchBrush = GetBrightnessColor(newFactor) });
-                newFactor = 0; // Reset input after adding
+                BrightnessFactors.Add(new FactorItem { valueFactor = brightnessFactor, matchBrush = GetBrightnessColor(brightnessFactor) });
+                brightnessFactor = 0; // Reset input after adding
             }
         }
 
@@ -78,10 +91,10 @@ namespace color_palette_creator_v2
         // Method to add a new factor to the list
         public void AddHueFactor()
         {
-            if (newFactor > 0) // Add only if newFactor is valid
+            if (hueFactor > 0) // Add only if brightnessFactor is valid
             {
-                HueFactors.Add(new FactorItem { valueFactor = newFactor, matchBrush = GetHueColor(newFactor) });
-                newFactor = 0; // Reset input after adding
+                HueFactors.Add(new FactorItem { valueFactor = hueFactor, matchBrush = GetHueColor(hueFactor) });
+                hueFactor = 0; // Reset input after adding
             }
         }
 

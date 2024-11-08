@@ -211,7 +211,7 @@
                             Margin="0,10"
                             >
                     <TextBox Width="130"
-                             Text="{x:Bind DataContext.NewFactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{x:Bind DataContext.BrightnessFactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              PlaceholderText="Enter new brightness factor">
                     </TextBox>
 
@@ -231,7 +231,7 @@
             <StackPanel Margin="10">
 
                 <!-- Title -->
-                <TextBlock Text="Hue Factors 0-255:"
+                <TextBlock Text="Hue Factors 0-360:"
                            FontWeight="Bold"
                            Margin="5" />
 
@@ -290,7 +290,7 @@
                 <StackPanel Orientation="Horizontal"
                             Margin="0,10">
                     <TextBox Width="130"
-                             Text="{x:Bind DataContext.NewFactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{x:Bind DataContext.HueFactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              PlaceholderText="Enter new brightness factor">
                     </TextBox>
 
