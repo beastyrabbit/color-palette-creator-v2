@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml.Media;
+﻿using ColorMine.ColorSpaces;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,10 +10,11 @@ using System.Threading.Tasks;
 
 namespace color_palette_creator_v2
 {
-    public class BrightnessViewModel : INotifyPropertyChanged
+    public class DataViewModel : INotifyPropertyChanged
     {
         // Observable collection to hold brightness values
         public ObservableCollection<int> BrightnessFactors { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<int> HueFactors { get; set; } = new ObservableCollection<int>();
 
         private AppSettings appSettings;
         private int newFactor;
@@ -36,19 +38,30 @@ namespace color_palette_creator_v2
             // Create a grayscale color based on the clamped brightness value
             return new SolidColorBrush(Windows.UI.Color.FromArgb(255, brightnessByte, brightnessByte, brightnessByte));
         }
+        public SolidColorBrush GetHueColor(int hue)
+        {
+            var hsl = new Hsl { H = hue, S = 1.0, L = 0.5 };
+            var rgb = hsl.To<Rgb>();
+
+            return new SolidColorBrush(Windows.UI.Color.FromArgb(255, (byte)rgb.R, (byte)rgb.G, (byte)rgb.B));
+
+        }
 
 
-        public BrightnessViewModel()
+        public DataViewModel()
         {
             appSettings = new AppSettings();
             // Load the brightness factors from settings
-            var loadedFactors = appSettings.LoadBrightnessFactors();
-            BrightnessFactors = new ObservableCollection<int>(loadedFactors);
+            var loadedBrightnessFactors = appSettings.LoadBrightnessFactors();
+            BrightnessFactors = new ObservableCollection<int>(loadedBrightnessFactors);
             BrightnessFactors.CollectionChanged += (s, e) => SaveBrightnessFactors();
+            var loadedHueFactors = appSettings.LoadHueFactors();
+            HueFactors = new ObservableCollection<int>(loadedHueFactors);
+            HueFactors.CollectionChanged += (s, e) => SaveHueFactors();
         }
 
         // Method to add a new factor to the list
-        public void AddFactor()
+        public void AddBrightnessFactor()
         {
             if (newFactor > 0) // Add only if newFactor is valid
             {
@@ -58,11 +71,30 @@ namespace color_palette_creator_v2
         }
 
         // Method to remove a factor from the list
-        public void RemoveFactor(int factor)
+        public void RemoveBrightnessFactor(int factor)
         {
             if (BrightnessFactors.Contains(factor))
             {
                 BrightnessFactors.Remove(factor);
+            }
+        }
+
+        // Method to add a new factor to the list
+        public void AddHueFactor()
+        {
+            if (newFactor > 0) // Add only if newFactor is valid
+            {
+                HueFactors.Add(newFactor);
+                newFactor = 0; // Reset input after adding
+            }
+        }
+
+        // Method to remove a factor from the list
+        public void RemoveHueFactor(int factor)
+        {
+            if (HueFactors.Contains(factor))
+            {
+                HueFactors.Remove(factor);
             }
         }
 
@@ -77,6 +109,10 @@ namespace color_palette_creator_v2
             appSettings.SaveBrightnessFactors(new List<int>(BrightnessFactors));
         }
 
+        private void SaveHueFactors()
+        {
+            appSettings.SaveHueFactors(new List<int>(HueFactors));
+        }
 
     }
 }

@@ -32,8 +32,8 @@ namespace color_palette_creator_v2
     public sealed partial class MainWindow : Window
     {
         private readonly AppSettings appSettings;
-        public BrightnessViewModel BrightnessViewModel { get; set; }
-        public HueViewModel HueViewModel { get; set; }
+        public DataViewModel DataContext { get; set; }
+
 
 
         public MainWindow()
@@ -42,8 +42,8 @@ namespace color_palette_creator_v2
 
             this.InitializeComponent();
             this.Closed += OnWindowClosed;
-            BrightnessViewModel = new BrightnessViewModel();
-            HueViewModel = new HueViewModel();
+            DataContext = new DataViewModel();
+
         }
 
 
@@ -132,19 +132,19 @@ namespace color_palette_creator_v2
 
         private void AddNewHueFactor_Click(object sender, RoutedEventArgs e)
         {
-            HueViewModel.AddFactor();
+            DataContext.AddHueFactor();
         }
 
         private void AddNewBrightnessFactor_Click(object sender, RoutedEventArgs e)
         {
-            BrightnessViewModel.AddFactor();
+            DataContext.AddBrightnessFactor();
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.DataContext is int factor)
             {
-                BrightnessViewModel.BrightnessFactors.Add(factor + 1); // Add 1 to the selected factor
+                DataContext.BrightnessFactors.Add(factor + 1); // Add 1 to the selected factor
             }
         }
 
@@ -152,7 +152,7 @@ namespace color_palette_creator_v2
         {
             if ((sender as MenuFlyoutItem)?.DataContext is int factor)
             {
-                BrightnessViewModel.RemoveFactor(factor);
+                DataContext.RemoveBrightnessFactor(factor);
             }
         }
 
@@ -160,7 +160,7 @@ namespace color_palette_creator_v2
         {
             if ((sender as MenuFlyoutItem)?.DataContext is int factor)
             {
-                HueViewModel.RemoveFactor(factor);
+                DataContext.RemoveHueFactor(factor);
             }
         }
 
