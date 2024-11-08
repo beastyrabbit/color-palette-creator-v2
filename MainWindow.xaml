@@ -38,6 +38,16 @@
                         Click="SelectFolderButton_Click"
                         Width="200"
                         Margin="0,5" />
+                <Button Name="SelectColorPalette"
+                        Content="Select Color Palette"
+                        Click="SelectColorPaletteButton_Click"
+                        Width="200"
+                        Margin="0,5" />
+                <Button Name="SelectRefFile"
+                        Content="Select Ref File"
+                        Click="SelectRefFileButton_Click"
+                        Width="200"
+                        Margin="0,5" />
                 <Button Name="ResetSettings"
                         Content="Reset"
                         Click="ResetSettings_Click"

@@ -21,6 +21,8 @@ public class AppSettings
 
     }
 
+   
+
     // Property to store DominantColorCount
     public int DominantColorCount
     {
