@@ -250,5 +250,18 @@ HueFactors.Clear(); // Clear existing items
 
         }
 
+        public void RemoveAllBrightnessFactors()
+        {
+            BrightnessFactors.Clear();
+        }
+        public void RemoveAllHueFactors()
+        {
+            HueFactors.Clear();
+        }
+        public void RemoveAllColorFactors()
+        {
+            ColorFactors.Clear();
+        }
+
     }
 }

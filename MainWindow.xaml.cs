@@ -274,6 +274,19 @@ namespace color_palette_creator_v2
                 DataContext.RemoveColorFactor(factor);
             }
         }
+        private void RemoveAllBrightnessButton_Click(object sender, RoutedEventArgs e)
+        {
+                DataContext.RemoveAllBrightnessFactors();
+        }
+        private void RemoveAllHueButton_Click(object sender, RoutedEventArgs e)
+        {
+                DataContext.RemoveAllHueFactors();  
+        }
+        private void RemoveAllColorButton_Click(object sender, RoutedEventArgs e)
+        {
+                DataContext.RemoveAllColorFactors();
+        }
+
 
         private void ResetSettings_Click(object sender, RoutedEventArgs e)
         {
@@ -321,6 +334,10 @@ namespace color_palette_creator_v2
             ResetSettings.IsEnabled = isEnabled;
             ResetSettings.Background = new SolidColorBrush(backgroundColor);
         }
+
+
+
+        
 
     }
 }

@@ -251,6 +251,15 @@
                                   Foreground="Green" />
                         </Button.Content>
                     </Button>
+                    <Button Width="45"
+                            Margin="5,0"
+                            Click="RemoveAllBrightnessButton_Click">
+                        <Button.Content>
+                            <FontIcon Glyph="&#xE74D;"
+                                      FontSize="20"
+                                      Foreground="Red" />
+                        </Button.Content>
+                    </Button>
                 </StackPanel>
 
             </StackPanel>
@@ -343,6 +352,15 @@
                             <FontIcon Glyph="&#xE710;"
                                       FontSize="20"
                                       Foreground="Green" />
+                        </Button.Content>
+                    </Button>
+                    <Button Width="45"
+                            Margin="5,0"
+                            Click="RemoveAllHueButton_Click">
+                        <Button.Content>
+                            <FontIcon Glyph="&#xE74D;"
+                                      FontSize="20"
+                                      Foreground="Red" />
                         </Button.Content>
                     </Button>
                 </StackPanel>
@@ -454,6 +472,15 @@
                             <FontIcon Glyph="&#xE710;"
                                       FontSize="20"
                                       Foreground="Green" />
+                        </Button.Content>
+                    </Button>
+                    <Button Width="45"
+                            Margin="5,0"
+                            Click="RemoveAllColorButton_Click">
+                        <Button.Content>
+                            <FontIcon Glyph="&#xE74D;"
+                                      FontSize="20"
+                                      Foreground="Red" />
                         </Button.Content>
                     </Button>
                 </StackPanel>
