@@ -60,8 +60,20 @@ namespace color_palette_creator_v2
         public ObservableCollection<FactorItem> BrightnessFactors { get; set; } = new ObservableCollection<FactorItem>();
         public ObservableCollection<FactorItem> HueFactors { get; set; } = new ObservableCollection<FactorItem>();
         public ObservableCollection<FactorItem> ColorFactors { get; set; } = new ObservableCollection<FactorItem>();
+        public bool AddColorFactors  { get; set; }
+        public bool UseReferanceImage
+        {
+            get => useReferanceImage;
+            set
+            {
+                useReferanceImage = value;
+                OnPropertyChanged(nameof(UseReferanceImage));
+            }
+        }
+        private bool useReferanceImage;
+        public bool DownSizeImage  { get; set; }
 
-        private AppSettings appSettings;
+    private AppSettings appSettings;
         private int brightnessFactor;
         public int BrightnessFactor
 
@@ -117,8 +129,8 @@ namespace color_palette_creator_v2
                 }
             }
         }
-        public bool InputFileSelected { get; set; } = false;
-        public bool OutputFolderSelected { get; set; } = false;
+        public List<string> InputFileSelected { get; set; }
+        public string OutputFolderSelected { get; set; }
 
         private Windows.UI.Color colorPicked = Windows.UI.Color.FromArgb(255, 255, 255, 255);
         public Windows.UI.Color ColorPicked
@@ -137,7 +149,6 @@ namespace color_palette_creator_v2
         public DataViewModel()
         {
             appSettings = new AppSettings();
-
             // Load collections directly from settings
             BrightnessFactors = new ObservableCollection<FactorItem>(appSettings.LoadBrightnessFactors());
             BrightnessFactors.CollectionChanged += (s, e) =>

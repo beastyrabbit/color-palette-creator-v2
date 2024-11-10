@@ -46,28 +46,39 @@ namespace color_palette_creator_v2
             this.InitializeComponent();
             this.Closed += OnWindowClosed;
             DataContext = new DataViewModel();
-            setupButton();
-            appSettings.LoadImageFromLocalStorageAsync().ContinueWith((task) =>
-            {
-                if (task.Result != null)
-                {
-                    var RefImageData = ImgWorkerClass.PrepareAndStoreImageAsRGBA(task.Result.FilePath);
-
-                    if (RefImageData != null)
-                    {
-                        (bool isMatch, List<string> missingColors) = ImgWorkerClass.checkRefImage(RefImageData);
-                        if (isMatch)
-                        {
-                            RefImageData.ColorMatrix = missingColors;
-                            DataContext.RefImageData = RefImageData;
-                        }
-                    }
-                }
-            });
-
+            SetupButton();
+            // Call the async method without ContinueWith
+            _ = LoadAndProcessImageAsync();
         }
 
-        private void setupButton()
+        private async Task LoadAndProcessImageAsync()
+        {
+            var imageFile = await appSettings.LoadImageFromLocalStorageAsync();
+
+            if (imageFile != null)
+            {
+                var RefImageData = ImgWorkerClass.PrepareAndStoreImageAsRGBA(imageFile.FilePath);
+
+                if (RefImageData != null)
+                {
+                    (bool isMatch, List<string> missingColors) = ImgWorkerClass.checkRefImage(RefImageData);
+
+                    if (isMatch)
+                    {
+                        RefImageData.ColorMatrix = missingColors;
+                        DataContext.RefImageData = RefImageData;
+                        UpdateSelectRefFileButton(true, Microsoft.UI.Colors.YellowGreen);
+                        DataContext.UseReferanceImage = true;
+                    }
+                    else
+                    {
+                        UpdateSelectRefFileButton(true, Microsoft.UI.Colors.Gray);
+                        DataContext.UseReferanceImage = false;
+                    }
+                }
+            }
+        }
+        private void SetupButton()
         {
             UpdateResetSettingsButton(true,Microsoft.UI.Colors.Gray);
             if(DataContext.ColorFactors.Count > 0){
@@ -80,20 +91,13 @@ namespace color_palette_creator_v2
             
             UpdateSelectFolderButton(true, Microsoft.UI.Colors.OrangeRed);
             UpdateSelectColorPaletteButton(true, Microsoft.UI.Colors.Gray);
-            if (DataContext.RefImageData != null)
-            {
-                UpdateSelectRefFileButton(true, Microsoft.UI.Colors.YellowGreen);
-            }
-            else
-            {
-                UpdateSelectRefFileButton(true, Microsoft.UI.Colors.Gray);
-            }
             UpdateSubmitButton(false, Microsoft.UI.Colors.Red);
 
-            DataContext.BrightnessFactors.CollectionChanged += (s, e) =>
+            DataContext.ColorFactors.CollectionChanged += (s, e) =>
             {
                 UpdateButtonSettings();
             };
+
 
         }
 
@@ -107,6 +111,15 @@ namespace color_palette_creator_v2
             else
             {
                 UpdateSelectImageButton(true, Microsoft.UI.Colors.OrangeRed);
+            }
+
+            if(DataContext.RefImageData != null)
+            {
+                UpdateSelectRefFileButton(true, Microsoft.UI.Colors.YellowGreen);
+            }
+            else
+            {
+                UpdateSelectRefFileButton(true, Microsoft.UI.Colors.Gray);
             }
         }
 
@@ -210,6 +223,7 @@ namespace color_palette_creator_v2
                         prefedFile.ColorMatrix = missingColors;
                         DataContext.RefImageData = prefedFile;
                         _ = appSettings.SaveImageToLocalStorageAsync(file);
+                        UpdateSelectRefFileButton(true, Microsoft.UI.Colors.YellowGreen);
                     }
                     else
                     {
@@ -282,34 +296,29 @@ namespace color_palette_creator_v2
 
         private async void SelectFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            // Create the file save picker
-            var savePicker = new FileSavePicker();
-            savePicker.SuggestedStartLocation = PickerLocationId.Downloads;
+            // Initialize the folder picker
+            var folderPicker = new FolderPicker();
 
-            // Custom "file type" to indicate location selection (placeholder extension)
-            savePicker.FileTypeChoices.Add("Select Folder", new List<string>() { ".folder" });
-            savePicker.SuggestedFileName = "ChooseThisFolder";
-
-            // Get the window handle and initialize the picker for desktop apps
+            // Associate with the current window
             IntPtr hwnd = WindowNative.GetWindowHandle(this);
-            InitializeWithWindow.Initialize(savePicker, hwnd);
+            InitializeWithWindow.Initialize(folderPicker, hwnd);
 
-            // Show the picker and get the selected folder path
-            StorageFile file = await savePicker.PickSaveFileAsync();
-            if (file != null)
+            // Set file type filter (required, even for folders)
+            folderPicker.FileTypeFilter.Add("*");
+
+            // Show the folder picker
+            StorageFolder selectedFolder = await folderPicker.PickSingleFolderAsync();
+            if (selectedFolder != null)
             {
-                // Retrieve the parent folder of the "file" to get the chosen folder path
-                StorageFolder folder = await file.GetParentAsync();
-                if (folder != null)
-                {
-                    string folderPath = folder.Path;
+                    string folderPath = selectedFolder.Path;
 
                     // Save the folder path for future use
-                    ApplicationData.Current.LocalSettings.Values["LastSelectedFolderPath"] = folderPath;
+                    DataContext.OutputFolderSelected = folderPath;
+                    UpdateButtonSettings();
+
 
                     await ShowDialog($"Folder selected: {folderPath}");
                 }
-            }
             else
             {
                 await ShowDialog("No folder was selected.");
@@ -369,6 +378,14 @@ namespace color_palette_creator_v2
                 DataContext.RemoveAllColorFactors();
         }
 
+        private void RemoveRefFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            DataContext.RefImageData = null;
+            UpdateSelectRefFileButton(true, Microsoft.UI.Colors.Gray);
+            _ = appSettings.DeleteImageFromLocalStorageAsync();
+            UpdateButtonSettings();
+        }
+
 
         private void ResetSettings_Click(object sender, RoutedEventArgs e)
         {
@@ -406,7 +423,15 @@ namespace color_palette_creator_v2
         // Method to update Submit button properties
         private void UpdateSubmitButton(bool isEnabled, Windows.UI.Color backgroundColor)
         {
-            submitButton.IsEnabled = isEnabled;
+            if (DataContext.OutputFolderSelected != null)
+            {
+                submitButton.IsEnabled = isEnabled;
+            }
+            else
+            {
+                submitButton.IsEnabled = false;
+            }
+            
             submitButton.Background = new SolidColorBrush(backgroundColor);
         }
 

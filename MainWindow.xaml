@@ -43,11 +43,23 @@
                         Click="SelectColorPaletteButton_Click"
                         Width="200"
                         Margin="0,5" />
-                <Button Name="SelectRefFile"
-                        Content="Select Ref File"
-                        Click="SelectRefFileButton_Click"
-                        Width="200"
-                        Margin="0,5" />
+                <StackPanel  Orientation="Horizontal">
+                    <Button Name="SelectRefFile"
+                            Content="Select Ref File"
+                            Click="SelectRefFileButton_Click"
+                            Width="150"
+                            Margin="0,5" />
+                    <Button Width="45"
+                            Margin="5,0"
+                            Click="RemoveRefFileButton_Click">
+                        <Button.Content>
+                            <FontIcon Glyph="&#xE74D;"
+                                      FontSize="20"
+                                      Foreground="Red" />
+                        </Button.Content>
+                    </Button>
+                </StackPanel>
+                
                 <Button Name="submitButton"
                         Content="Submit"
                         Click="SubmitButton_Click"
@@ -124,13 +136,21 @@
                            FontSize="16"
                            Margin="0,0,0,10" />
 
-
-                <CheckBox Content="Double Brightness"
-                          Margin="5"
-                          IsChecked="{Binding Path=AddDoubleBrightness}" />
-                <CheckBox Content="Downsize Image"
-                          Margin="5"
-                          IsChecked="{Binding Path=DownsizeImage}" />
+                <ToggleSwitch AutomationProperties.Name="ColorFactorstoggle"
+                              OffContent="Add Color Factors"
+                              OnContent="Color Factors Included"
+                              Margin="5"
+                              IsOn="{x:Bind DataContext.AddColorFactors, Mode=TwoWay}" />
+                <ToggleSwitch AutomationProperties.Name="RefFileToggle"
+                              Margin="5"
+                              OffContent="Output Without Ref File"
+                              OnContent="Output With Ref File"
+                              IsOn="{x:Bind DataContext.UseReferanceImage, Mode=TwoWay}" />
+                <ToggleSwitch AutomationProperties.Name="DownsizeImageToggle"
+                              OffContent="Use Full-Size Image"
+                              OnContent="Use Downsized Image"
+                              Margin="5"
+                              IsOn="{x:Bind DataContext.DownSizeImage, Mode=TwoWay}" />
             </StackPanel>
 
         </StackPanel>
@@ -478,15 +498,6 @@
                             <FontIcon Glyph="&#xE710;"
                                       FontSize="20"
                                       Foreground="Green" />
-                        </Button.Content>
-                    </Button>
-                    <Button Width="45"
-                            Margin="5,0"
-                            Click="RemoveAllColorButton_Click">
-                        <Button.Content>
-                            <FontIcon Glyph="&#xE74D;"
-                                      FontSize="20"
-                                      Foreground="Red" />
                         </Button.Content>
                     </Button>
                 </StackPanel>

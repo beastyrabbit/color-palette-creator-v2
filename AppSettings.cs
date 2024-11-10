@@ -48,42 +48,38 @@ public class AppSettings
         set => SaveBrightnessFactors(value);
     }
 
+    public async Task DeleteImageFromLocalStorageAsync(string fileName = "RefImage.png")
+    {
+        StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+        StorageFile imageFile = await localFolder.GetFileAsync(fileName);
+        await imageFile.DeleteAsync();
+    }
 
-public async Task SaveImageToLocalStorageAsync(StorageFile sourceFile, string fileName = "RefImage.png")
-{
-    // Get the app's local storage folder
-    StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+    public async Task SaveImageToLocalStorageAsync(StorageFile sourceFile, string fileName = "RefImage.png")
+    {
+        // Get the app's local storage folder
+        StorageFolder localFolder = ApplicationData.Current.LocalFolder;
 
-    // Copy the image file to local storage
-    await sourceFile.CopyAsync(localFolder, fileName, NameCollisionOption.ReplaceExisting);
-}
+        // Copy the image file to local storage
+        await sourceFile.CopyAsync(localFolder, fileName, NameCollisionOption.ReplaceExisting);
+    }
 
     public async Task<RefImageData> LoadImageFromLocalStorageAsync(string fileName = "RefImage.png")
     {
         StorageFolder localFolder = ApplicationData.Current.LocalFolder;
 
-        try
-        {
-            // Get the image file by name from local storage
-            StorageFile imageFile = await localFolder.GetFileAsync(fileName);
+        // Get the image file by name from local storage
+        StorageFile imageFile = await localFolder.GetFileAsync(fileName);
 
-            // Use an image decoding library if you need to get the width and height
-            using (var stream = await imageFile.OpenAsync(FileAccessMode.Read))
-            {
-                var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(stream);
-                return new RefImageData
-                {
-                    Width = (int)decoder.PixelWidth,
-                    Height = (int)decoder.PixelHeight,
-                    FilePath = imageFile.Path
-                };
-            }
-        }
-        catch (FileNotFoundException)
+        // Use an image decoding library if you need to get the width and height
+        var stream = await imageFile.OpenAsync(FileAccessMode.Read);
+        var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(stream);
+        return new RefImageData
         {
-            // Handle the case where the image file does not exist
-            return null;
-        }
+            Width = (int)decoder.PixelWidth,
+            Height = (int)decoder.PixelHeight,
+            FilePath = imageFile.Path
+        };
     }
 
 
