@@ -21,6 +21,7 @@ using System.Windows;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
 using ColorMine.ColorSpaces;
+using SixLabors.ImageSharp.PixelFormats;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -34,6 +35,7 @@ namespace color_palette_creator_v2
     {
         private readonly AppSettings appSettings;
         public DataViewModel DataContext { get; set; }
+        public static ImgWorkerClass ImgWorker { get; } = new ImgWorkerClass();
 
 
 
@@ -45,19 +47,61 @@ namespace color_palette_creator_v2
             this.Closed += OnWindowClosed;
             DataContext = new DataViewModel();
             setupButton();
+            appSettings.LoadImageFromLocalStorageAsync().ContinueWith((task) =>
+            {
+                if (task.Result != null)
+                {
+                    var RefImageData = ImgWorkerClass.PrepareAndStoreImageAsRGBA(task.Result.FilePath);
 
+                    if (RefImageData != null)
+                    {
+                        (bool isMatch, List<string> missingColors) = ImgWorkerClass.checkRefImage(RefImageData);
+                        if (isMatch)
+                        {
+                            RefImageData.ColorMatrix = missingColors;
+                            DataContext.RefImageData = RefImageData;
+                            UpdateSelectRefFileButton(true, Microsoft.UI.Colors.YellowGreen);
+                        }
+                    }
+                }
+            });
 
         }
 
         private void setupButton()
         {
             UpdateResetSettingsButton(true,Microsoft.UI.Colors.Gray);
-            UpdateSelectImageButton(true, Microsoft.UI.Colors.YellowGreen);
-            UpdateSelectFolderButton(true, Microsoft.UI.Colors.YellowGreen);
+            if(DataContext.ColorFactors.Count > 0){
+                UpdateSelectImageButton(true, Microsoft.UI.Colors.YellowGreen);
+                UpdateSubmitButton(true, Microsoft.UI.Colors.YellowGreen);
+            }
+            else{
+                UpdateSelectImageButton(true, Microsoft.UI.Colors.OrangeRed);
+            }
+            
+            UpdateSelectFolderButton(true, Microsoft.UI.Colors.OrangeRed);
             UpdateSelectColorPaletteButton(true, Microsoft.UI.Colors.Gray);
             UpdateSelectRefFileButton(true, Microsoft.UI.Colors.Gray);
             UpdateSubmitButton(false, Microsoft.UI.Colors.Red);
 
+            DataContext.BrightnessFactors.CollectionChanged += (s, e) =>
+            {
+                UpdateButtonSettings();
+            };
+
+        }
+
+        private void UpdateButtonSettings()
+        {
+            if (DataContext.ColorFactors.Count > 0)
+            {
+                UpdateSelectImageButton(true, Microsoft.UI.Colors.YellowGreen);
+                UpdateSubmitButton(true, Microsoft.UI.Colors.YellowGreen);
+            }
+            else
+            {
+                UpdateSelectImageButton(true, Microsoft.UI.Colors.OrangeRed);
+            }
         }
 
         private void OnWindowClosed(object sender, WindowEventArgs args)
@@ -115,6 +159,7 @@ namespace color_palette_creator_v2
                 // Process the selected file path
                 string imagePath = files[0].Path;
                 await ShowDialog($"Image selected: {imagePath}");
+                UpdateSelectRefFileButton(true, Microsoft.UI.Colors.YellowGreen);
             }
             else
             {
@@ -122,7 +167,7 @@ namespace color_palette_creator_v2
             }
         }
 
-        private async void SelectColorPaletteButton_Click(object sender, RoutedEventArgs e)
+        private async void SelectRefFileButton_Click(object sender, RoutedEventArgs e)
         {
             // Create the file picker
             var openPicker = new FileOpenPicker();
@@ -149,6 +194,23 @@ namespace color_palette_creator_v2
             {
                 // Process the selected file path
                 string imagePath = file.Path;
+
+                var prefedFile = ImgWorkerClass.PrepareAndStoreImageAsRGBA(imagePath);
+                if (prefedFile != null)
+                {
+                    (bool isMatch, List<string> missingColors) = ImgWorkerClass.checkRefImage(prefedFile);
+                    if (isMatch)
+                    {
+                        prefedFile.ColorMatrix = missingColors;
+                        DataContext.RefImageData = prefedFile;
+                        _ = appSettings.SaveImageToLocalStorageAsync(file);
+                    }
+                    else
+                    {
+                        await ShowDialog($"Image is not a valid color palette. Missing colors: {string.Join(", ", missingColors)}");
+                    }
+
+                }
                 await ShowDialog($"Image selected: {imagePath}");
             }
             else
@@ -157,7 +219,7 @@ namespace color_palette_creator_v2
             }
         }
 
-        private async void SelectRefFileButton_Click(object sender, RoutedEventArgs e)
+        private async void SelectColorPaletteButton_Click(object sender, RoutedEventArgs e)
         {
             // Create the file picker
             var openPicker = new FileOpenPicker();
@@ -170,6 +232,14 @@ namespace color_palette_creator_v2
             openPicker.FileTypeFilter.Add(".jpeg");
             openPicker.FileTypeFilter.Add(".png");
             openPicker.FileTypeFilter.Add(".bmp");
+            openPicker.FileTypeFilter.Add(".gif");
+            openPicker.FileTypeFilter.Add(".tif");
+            openPicker.FileTypeFilter.Add(".tiff");
+            openPicker.FileTypeFilter.Add(".webp");
+            openPicker.FileTypeFilter.Add(".ico");
+            openPicker.FileTypeFilter.Add(".pbm");
+            openPicker.FileTypeFilter.Add(".pgm");
+            openPicker.FileTypeFilter.Add(".ppm");
 
             // Get the window handle and initialize the picker for desktop apps
             IntPtr hwnd = WindowNative.GetWindowHandle(this);
@@ -179,18 +249,24 @@ namespace color_palette_creator_v2
             StorageFile file = await openPicker.PickSingleFileAsync();
             if (file != null)
             {
-                // Check if the file extension is not ".jpeg"
-                if (file.FileType.ToLower() != ".jpeg")
-                {
-                    // Process the selected file path and save it in local settings
-                    string imagePath = file.Path;
-                    ApplicationData.Current.LocalSettings.Values["LastSelectedRefFilePath"] = imagePath;
-                    await ShowDialog($"Image selected: {imagePath}");
+                List<Rgba32> listofColors = ImgWorker.GetRefSheetColors(file.Path);
+                // Add to ColorFactors remove Alpha
+                if (listofColors != null) {
+                    foreach (var color in listofColors)
+                    {
+
+                        // Convert to WPF color for SolidColorBrush
+                        var wpfColor = Windows.UI.Color.FromArgb(
+                            color.A,
+                            color.R,
+                            color.G,
+                            color.B
+                        );
+                        var colorFacttor = $"#{color.A:X2}{color.R:X2}{color.G:X2}{color.B:X2}";
+                        DataContext.AddColorFactor(new FactorItem { valueFactor = colorFacttor, matchBrush = new SolidColorBrush(wpfColor) });
+                    }
                 }
-                else
-                {
-                    await ShowDialog("JPEG files are not allowed.");
-                }
+
             }
             else
             {
@@ -335,9 +411,47 @@ namespace color_palette_creator_v2
             ResetSettings.Background = new SolidColorBrush(backgroundColor);
         }
 
+        void OnHueVariantItemClicked(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuFlyoutItem menuItem)
+            {
+                string variant = menuItem.Text; // Access the Text property
+                switch (variant)
+            {
+                case "Compl":
+                    // Complementary: ±180°
+                    DataContext.AddHueFactor(180);
+                    DataContext.AddHueFactor(-180);
+                    break;
+
+                case "Triadic":
+                    // Triadic: ±120°
+                    DataContext.AddHueFactor(120);
+                    DataContext.AddHueFactor(-120);
+                    break;
+
+                case "Split":
+                    // Split-Complementary: ±150°
+                    DataContext.AddHueFactor(150);
+                    DataContext.AddHueFactor(-150);
+                    break;
+
+                case "Tetradic":
+                    // Tetradic: ±90° and ±180°
+                    DataContext.AddHueFactor(90);
+                    DataContext.AddHueFactor(-90);
+                    DataContext.AddHueFactor(180);
+                    DataContext.AddHueFactor(-180);
+                    break;
+
+                default:
+                    throw new ArgumentException("Unknown variant: " + variant);
+                }
+            }
+        }
 
 
-        
+
 
     }
 }

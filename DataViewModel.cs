@@ -1,9 +1,12 @@
 ﻿using ColorMine.ColorSpaces;
 using Microsoft.UI.Xaml.Media;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -39,6 +42,18 @@ namespace color_palette_creator_v2
     }
 
 
+    public class RefImageData
+    {
+        // Original properties for image dimensions and pixel data
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public Image<Rgba32> Image { get; set; }
+        public List<string> ColorMatrix { get; set; }
+
+        // New property to store the file path of the image in local storage
+        public string FilePath { get; set; }
+    }
+
     public class DataViewModel : INotifyPropertyChanged
     {
         // Observable collection to hold brightness values
@@ -55,10 +70,12 @@ namespace color_palette_creator_v2
             get => brightnessFactor;
             set
             {
-                brightnessFactor = value < 0 ? 0 : value > 255 ? 360 : value;
+                brightnessFactor = value < -255 ? 0 : value > 255 ? 360 : value;
                 OnPropertyChanged(nameof(BrightnessFactor));
             }
         }
+
+        
 
         private int hueFactor;
         public int HueFactor
@@ -68,7 +85,7 @@ namespace color_palette_creator_v2
             get => hueFactor;
             set
             {
-                hueFactor = value < 0 ? 0 : value > 360 ? 360 : value;
+                hueFactor = value < -360 ? 0 : value > 360 ? 360 : value;
                 OnPropertyChanged(nameof(HueFactor));
             }
         }
@@ -87,7 +104,7 @@ namespace color_palette_creator_v2
             }
         }
 
-        private string hexColorPicked = "#FFFFFF";
+        private string hexColorPicked = "#FFFFFFFF";
         public string HexColorPicked
         {
             get => hexColorPicked;
@@ -100,6 +117,8 @@ namespace color_palette_creator_v2
                 }
             }
         }
+        public bool InputFileSelected { get; set; } = false;
+        public bool OutputFolderSelected { get; set; } = false;
 
         private Windows.UI.Color colorPicked = Windows.UI.Color.FromArgb(255, 255, 255, 255);
         public Windows.UI.Color ColorPicked
@@ -108,9 +127,11 @@ namespace color_palette_creator_v2
             set
             {
                 colorPicked = value;
-                HexColorPicked = $"#{colorPicked.R:X2}{colorPicked.G:X2}{colorPicked.B:X2}";
+                HexColorPicked = $"#{colorPicked.A:X2}{colorPicked.R:X2}{colorPicked.G:X2}{colorPicked.B:X2}";
             }
         }
+
+        public RefImageData RefImageData { get; set; }
 
 
         public DataViewModel()
@@ -137,16 +158,15 @@ namespace color_palette_creator_v2
             };
         }
 
- 
         public void ResetandReload()
         {
-BrightnessFactors.Clear(); // Clear existing items
+            BrightnessFactors.Clear(); // Clear existing items
             var loadedBrightnessFactors = appSettings.LoadBrightnessFactors();
             foreach (var item in loadedBrightnessFactors)
             {
                 BrightnessFactors.Add(item); // Append reloaded items
             }
-HueFactors.Clear(); // Clear existing items
+            HueFactors.Clear(); // Clear existing items
             var loadedHueFactors = appSettings.LoadHueFactors();
             foreach (var item in loadedHueFactors)
             {
@@ -163,11 +183,8 @@ HueFactors.Clear(); // Clear existing items
         // Method to add a new factor to the list
         public void AddBrightnessFactor()
         {
-            if (brightnessFactor > 0) // Add only if brightnessFactor is valid
-            {
                 BrightnessFactors.Add(new FactorItem { IntValueFactor = brightnessFactor, matchBrush = GetBrightnessColor(brightnessFactor) });
                 BrightnessFactor = 0; // Reset input after adding
-            }
         }
         // Method to remove a factor from the list
         public void RemoveBrightnessFactor(FactorItem factor)
@@ -181,7 +198,7 @@ HueFactors.Clear(); // Clear existing items
             
                 ColorFactors.Add(new FactorItem { valueFactor = hexColorPicked, matchBrush = new SolidColorBrush(ColorPicked) });
                 ColorFactor = default; // Reset input after adding
-            hexColorPicked = "#FFFFFF";
+            hexColorPicked = "#FFFFFFFF";
 
 
         }
@@ -197,11 +214,8 @@ HueFactors.Clear(); // Clear existing items
         // Method to add a new factor to the list
         public void AddHueFactor()
         {
-            if (hueFactor > 0) // Add only if brightnessFactor is valid
-            {
                 HueFactors.Add(new FactorItem { IntValueFactor = hueFactor, matchBrush = GetHueColor(hueFactor) });
                 HueFactor = 0; // Reset input after adding
-            }
         }
 
         // Method to remove a factor from the list
@@ -243,9 +257,12 @@ HueFactors.Clear(); // Clear existing items
         }
         public static Brush GetHueColor(int hue)
         {
-            var hsl = new Hsl { H = hue, S = 1.0, L = 0.5 };
+
+            // Set the target color in HSL with the specified hue, full saturation, and medium lightness
+            var hsl = new Hsl { H = hue % 360, S = 1.0, L = 0.5 };
             var rgb = hsl.To<Rgb>();
 
+            // Convert the RGB values to a SolidColorBrush
             return new SolidColorBrush(Windows.UI.Color.FromArgb(255, (byte)rgb.R, (byte)rgb.G, (byte)rgb.B));
 
         }
@@ -263,5 +280,15 @@ HueFactors.Clear(); // Clear existing items
             ColorFactors.Clear();
         }
 
+        internal void AddColorFactor(FactorItem factorItem)
+        {
+            ColorFactors.Add(factorItem);
+        }
+
+        internal void AddHueFactor(int hueFactor)
+        {
+            HueFactors.Add(new FactorItem { IntValueFactor = hueFactor, matchBrush = GetHueColor(hueFactor) });
+            HueFactor = 0; // Reset input after adding
+        }
     }
 }

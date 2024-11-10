@@ -2,8 +2,11 @@
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Windows.Storage;
+
 
 public class AppSettings
 {
@@ -20,7 +23,6 @@ public class AppSettings
         localSettings.Values.Clear();
 
     }
-
    
 
     // Property to store DominantColorCount
@@ -29,6 +31,8 @@ public class AppSettings
         get => (int)(localSettings.Values[nameof(DominantColorCount)] ?? 10);
         set => localSettings.Values[nameof(DominantColorCount)] = value;
     }
+
+
 
     // Property to store HighlightColorCount
     public int HighlightColorCount
@@ -43,6 +47,45 @@ public class AppSettings
         get => LoadBrightnessFactors();
         set => SaveBrightnessFactors(value);
     }
+
+
+public async Task SaveImageToLocalStorageAsync(StorageFile sourceFile, string fileName = "RefImage.png")
+{
+    // Get the app's local storage folder
+    StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+
+    // Copy the image file to local storage
+    await sourceFile.CopyAsync(localFolder, fileName, NameCollisionOption.ReplaceExisting);
+}
+
+    public async Task<RefImageData> LoadImageFromLocalStorageAsync(string fileName = "RefImage.png")
+    {
+        StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+
+        try
+        {
+            // Get the image file by name from local storage
+            StorageFile imageFile = await localFolder.GetFileAsync(fileName);
+
+            // Use an image decoding library if you need to get the width and height
+            using (var stream = await imageFile.OpenAsync(FileAccessMode.Read))
+            {
+                var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(stream);
+                return new RefImageData
+                {
+                    Width = (int)decoder.PixelWidth,
+                    Height = (int)decoder.PixelHeight,
+                    FilePath = imageFile.Path
+                };
+            }
+        }
+        catch (FileNotFoundException)
+        {
+            // Handle the case where the image file does not exist
+            return null;
+        }
+    }
+
 
     // Method to load BrightnessFactors
     public List<FactorItem> LoadBrightnessFactors()
@@ -161,10 +204,10 @@ public class AppSettings
                     string hex = item.valueFactor.TrimStart('#');
 
                     // Determine if the hex string includes an alpha component
-                    byte a = hex.Length == 8 ? byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber) : (byte)255;
-                    byte r = hex.Length == 8 ? byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber) : byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
-                    byte g = hex.Length == 8 ? byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber) : byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
-                    byte b = hex.Length == 8 ? byte.Parse(hex.Substring(6, 2), System.Globalization.NumberStyles.HexNumber) : byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+                    byte a = hex.Length == 8 ? byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber) : byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber); ;
+                    byte r = hex.Length == 8 ? byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber) : byte.Parse(hex.Substring(0, 4), System.Globalization.NumberStyles.HexNumber);
+                    byte g = hex.Length == 8 ? byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber) : byte.Parse(hex.Substring(2, 6), System.Globalization.NumberStyles.HexNumber);
+                    byte b = hex.Length == 8 ? byte.Parse(hex.Substring(6, 2), System.Globalization.NumberStyles.HexNumber) : byte.Parse(hex.Substring(4, 8), System.Globalization.NumberStyles.HexNumber);
 
                     item.matchBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(a, r, g, b));
                 }
