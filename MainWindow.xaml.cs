@@ -60,7 +60,6 @@ namespace color_palette_creator_v2
                         {
                             RefImageData.ColorMatrix = missingColors;
                             DataContext.RefImageData = RefImageData;
-                            UpdateSelectRefFileButton(true, Microsoft.UI.Colors.YellowGreen);
                         }
                     }
                 }
@@ -81,7 +80,14 @@ namespace color_palette_creator_v2
             
             UpdateSelectFolderButton(true, Microsoft.UI.Colors.OrangeRed);
             UpdateSelectColorPaletteButton(true, Microsoft.UI.Colors.Gray);
-            UpdateSelectRefFileButton(true, Microsoft.UI.Colors.Gray);
+            if (DataContext.RefImageData != null)
+            {
+                UpdateSelectRefFileButton(true, Microsoft.UI.Colors.YellowGreen);
+            }
+            else
+            {
+                UpdateSelectRefFileButton(true, Microsoft.UI.Colors.Gray);
+            }
             UpdateSubmitButton(false, Microsoft.UI.Colors.Red);
 
             DataContext.BrightnessFactors.CollectionChanged += (s, e) =>

@@ -155,12 +155,12 @@ namespace color_palette_creator_v2
             bool isExactMatch = false;
 
             // Filter out black and white from the flat list
-            var filteredRefImaget = fromRefImage.Where(c => c != "#00000000" && c != "#FFFFFFFF").ToList();
+            var filteredRefImage = fromRefImage.Where(c => c != "#00000000" && c != "#FFFFFFFF").ToList();
                 // Flatten the current 2D color grid to a single list
             var flattenedGenMatrix = fromGenMatrix.Where(c => c != "#00000000" && c != "#FFFFFFFF").ToList();
 
                 // Find colors in the flat list that are missing in the current flattened grid
-                var missingColors = filteredRefImaget.Except(flattenedGenMatrix).ToList();
+                var missingColors = filteredRefImage.Except(flattenedGenMatrix).ToList();
 
                 // Check if this is an exact match (no missing colors)
                 if (missingColors.Count == 0)
