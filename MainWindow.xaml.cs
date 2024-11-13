@@ -22,6 +22,7 @@ using Microsoft.UI.Windowing;
 using Windows.Graphics;
 using ColorMine.ColorSpaces;
 using SixLabors.ImageSharp.PixelFormats;
+using Windows.Devices.Haptics;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -81,22 +82,18 @@ namespace color_palette_creator_v2
         private void SetupButton()
         {
             UpdateResetSettingsButton(true,Microsoft.UI.Colors.Gray);
-            if(DataContext.ColorFactors.Count > 0){
-                UpdateSelectImageButton(true, Microsoft.UI.Colors.YellowGreen);
-                UpdateSubmitButton(true, Microsoft.UI.Colors.YellowGreen);
-            }
-            else{
-                UpdateSelectImageButton(true, Microsoft.UI.Colors.OrangeRed);
-            }
-            
             UpdateSelectFolderButton(true, Microsoft.UI.Colors.OrangeRed);
             UpdateSelectColorPaletteButton(true, Microsoft.UI.Colors.Gray);
-            UpdateSubmitButton(false, Microsoft.UI.Colors.Red);
-
-            DataContext.ColorFactors.CollectionChanged += (s, e) =>
+            UpdateSubmitButton(false, Microsoft.UI.Colors.Black);
+            UpdateButtonSettings();
+            // On DataContect Property Changed Event do an Button Update
+            // Attach to the PropertyChanged event
+            DataContext.PropertyChanged += (sender, args) =>
             {
                 UpdateButtonSettings();
             };
+
+
 
 
         }
@@ -106,21 +103,47 @@ namespace color_palette_creator_v2
             if (DataContext.ColorFactors.Count > 0)
             {
                 UpdateSelectImageButton(true, Microsoft.UI.Colors.YellowGreen);
-                UpdateSubmitButton(true, Microsoft.UI.Colors.YellowGreen);
+                ColorFactorstoggle.IsEnabled = true;
             }
             else
             {
                 UpdateSelectImageButton(true, Microsoft.UI.Colors.OrangeRed);
+                ColorFactorstoggle.IsEnabled = false;
             }
 
             if(DataContext.RefImageData != null)
             {
                 UpdateSelectRefFileButton(true, Microsoft.UI.Colors.YellowGreen);
+                RefFileToggle.IsEnabled = true;
             }
             else
             {
-                UpdateSelectRefFileButton(true, Microsoft.UI.Colors.Gray);
+                UpdateSelectRefFileButton(true, Microsoft.UI.Colors.Black);
+                RefFileToggle.IsEnabled = false;
+                RefFileToggle.IsOn = false;
             }
+
+            // Submit Button settings
+            // Enable if OutputFolderSelected is not null
+            // Enable if ColorFactors are present and ColorFactorstoggle is true
+            // Enable if InputFileSelected Count is greater than 0
+            if (DataContext.OutputFolderSelected != null)
+            {
+                if (DataContext.ColorFactors.Count > 0 && ColorFactorstoggle.IsOn == true)
+                {
+                    UpdateSubmitButton(true, Microsoft.UI.Colors.YellowGreen);
+                }
+                else if(DataContext.InputFileSelected != null && DataContext.InputFileSelected.Count > 0)
+                {
+                    UpdateSubmitButton(true, Microsoft.UI.Colors.YellowGreen);
+                }
+                else
+                {
+                    UpdateSubmitButton(false, Microsoft.UI.Colors.Black);
+                }
+            }
+
+
         }
 
         private void OnWindowClosed(object sender, WindowEventArgs args)
@@ -223,7 +246,6 @@ namespace color_palette_creator_v2
                         prefedFile.ColorMatrix = missingColors;
                         DataContext.RefImageData = prefedFile;
                         _ = appSettings.SaveImageToLocalStorageAsync(file);
-                        UpdateSelectRefFileButton(true, Microsoft.UI.Colors.YellowGreen);
                     }
                     else
                     {
@@ -305,20 +327,30 @@ namespace color_palette_creator_v2
 
             // Set file type filter (required, even for folders)
             folderPicker.FileTypeFilter.Add("*");
+            // Set to last used folder
+            folderPicker.SuggestedStartLocation = PickerLocationId.Downloads;
+            // Get the Downloads folder path
+            StorageFolder downloadsFolder = KnownFolders.PicturesLibrary;
+            string downloadsPath = downloadsFolder.Path;
+
+            StorageFolder initialFolder = await StorageFolder.GetFolderFromPathAsync(@"C:\Users\YourUser\Documents");
+
+            if (initialFolder != null)
+            {
+                folderPicker.SettingsIdentifier = initialFolder.Path;
+            }
 
             // Show the folder picker
             StorageFolder selectedFolder = await folderPicker.PickSingleFolderAsync();
             if (selectedFolder != null)
             {
-                    string folderPath = selectedFolder.Path;
+                string folderPath = selectedFolder.Path;
 
-                    // Save the folder path for future use
-                    DataContext.OutputFolderSelected = folderPath;
-                    UpdateButtonSettings();
+                // Save the folder path for future use
+                DataContext.OutputFolderSelected = folderPath;
 
-
-                    await ShowDialog($"Folder selected: {folderPath}");
-                }
+                await ShowDialog($"Folder selected: {folderPath}");
+            }
             else
             {
                 await ShowDialog("No folder was selected.");
@@ -383,7 +415,6 @@ namespace color_palette_creator_v2
             DataContext.RefImageData = null;
             UpdateSelectRefFileButton(true, Microsoft.UI.Colors.Gray);
             _ = appSettings.DeleteImageFromLocalStorageAsync();
-            UpdateButtonSettings();
         }
 
 
@@ -423,15 +454,7 @@ namespace color_palette_creator_v2
         // Method to update Submit button properties
         private void UpdateSubmitButton(bool isEnabled, Windows.UI.Color backgroundColor)
         {
-            if (DataContext.OutputFolderSelected != null)
-            {
-                submitButton.IsEnabled = isEnabled;
-            }
-            else
-            {
-                submitButton.IsEnabled = false;
-            }
-            
+            submitButton.IsEnabled = isEnabled; 
             submitButton.Background = new SolidColorBrush(backgroundColor);
         }
 
@@ -481,8 +504,23 @@ namespace color_palette_creator_v2
             }
         }
 
+        private async void RndImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            string imageUrl = await ImgWorker.GetRandomFeaturedImageUrl();
+            if (!string.IsNullOrEmpty(imageUrl))
+            {
+                // Display the image URL (or directly bind it to an Image control if you want)
+                // Add the image URL to the InputFileSelected list
+                DataContext.InputFileSelected.Add(imageUrl);
+                // Popup winfow with img
+                await ShowDialog($"Random image fetched: {imageUrl}");
+            }
+            else
+            {
+                // Pop windows with img 
+                await ShowDialog("Failed to fetch a random image.");
+            }
 
-
-
+        }
     }
 }

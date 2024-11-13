@@ -1,4 +1,5 @@
 ﻿using ColorMine.ColorSpaces;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml.Media;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -60,7 +61,17 @@ namespace color_palette_creator_v2
         public ObservableCollection<FactorItem> BrightnessFactors { get; set; } = new ObservableCollection<FactorItem>();
         public ObservableCollection<FactorItem> HueFactors { get; set; } = new ObservableCollection<FactorItem>();
         public ObservableCollection<FactorItem> ColorFactors { get; set; } = new ObservableCollection<FactorItem>();
-        public bool AddColorFactors  { get; set; }
+        private bool addColorFactors;
+        public bool AddColorFactors
+        {
+            get => addColorFactors;
+            set
+            {
+                addColorFactors = value;
+                OnPropertyChanged(nameof(AddColorFactors));
+            }
+        }
+        private bool useReferanceImage;
         public bool UseReferanceImage
         {
             get => useReferanceImage;
@@ -70,7 +81,6 @@ namespace color_palette_creator_v2
                 OnPropertyChanged(nameof(UseReferanceImage));
             }
         }
-        private bool useReferanceImage;
         public bool DownSizeImage  { get; set; }
 
     private AppSettings appSettings;

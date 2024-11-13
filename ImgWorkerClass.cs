@@ -11,11 +11,14 @@ using Windows.Storage;
 using System.Text.Json;
 using ColorMine.ColorSpaces;
 using System.Collections;
+using System.Net.Http;
+
 
 namespace color_palette_creator_v2
 {
     public class ImgWorkerClass
     {
+        private readonly HttpClient _httpClient = new HttpClient();
         public List<Rgba32> GetRefSheetColors(string imgPath)
         {
             List<Rgba32> colors = new List<Rgba32>();
@@ -83,6 +86,49 @@ namespace color_palette_creator_v2
             (bool isMatch, List<string> missingColors) = RefImageProcessor.FindBestColorMatch(refImageHexValues, uniqueHues);
 
             return (isMatch, missingColors);
+        }
+
+        public async Task<string> GetRandomFeaturedImageUrl()
+        {
+            try
+            {
+                // Step 1: Fetch a random featured image title
+                string randomImageApiUrl = "https://commons.wikimedia.org/w/api.php?action=query&list=random&rnnamespace=6&rnlimit=1&format=json&generator=categorymembers&gcmtitle=Category:Featured_pictures_on_Wikimedia_Commons";
+                HttpResponseMessage response = await _httpClient.GetAsync(randomImageApiUrl);
+                response.EnsureSuccessStatusCode();
+                string responseBody = await response.Content.ReadAsStringAsync();
+
+                using JsonDocument jsonDocument = JsonDocument.Parse(responseBody);
+                string imageTitle = jsonDocument.RootElement
+                    .GetProperty("query")
+                    .GetProperty("random")[0]
+                    .GetProperty("title")
+                    .GetString();
+
+                // Step 2: Fetch the image URL using the image title
+                string imageUrlApi = $"https://commons.wikimedia.org/w/api.php?action=query&titles={Uri.EscapeDataString(imageTitle)}&prop=imageinfo&iiprop=url&format=json";
+                HttpResponseMessage imageUrlResponse = await _httpClient.GetAsync(imageUrlApi);
+                imageUrlResponse.EnsureSuccessStatusCode();
+                string imageUrlResponseBody = await imageUrlResponse.Content.ReadAsStringAsync();
+
+                using JsonDocument imageUrlDocument = JsonDocument.Parse(imageUrlResponseBody);
+                string imageUrl = imageUrlDocument.RootElement
+                    .GetProperty("query")
+                    .GetProperty("pages")
+                    .EnumerateObject()
+                    .First()
+                    .Value
+                    .GetProperty("imageinfo")[0]
+                    .GetProperty("url")
+                    .GetString();
+
+                return imageUrl;
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions or errors here
+                return null;
+            }
         }
 
 
